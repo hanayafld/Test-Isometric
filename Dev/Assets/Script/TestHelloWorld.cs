@@ -78,8 +78,10 @@ public class TestHelloWorld : MonoBehaviour
 
     public Vector2 MapToScreen(Vector2 mapPos)
     {
-        var screenX = mapPos.x * this.tileWidth + (8 * -1 * 0.64f);
-        var screenY = mapPos.y * this.tileHeight + (6 * 1 * 0.64f);
+        //var screenX = mapPos.x * this.tileWidth + (8 * -1 * 0.64f);
+        //var screenY = mapPos.y * this.tileHeight + (6 * 1 * 0.64f);
+        var screenX = this.tiles.transform.position.x + mapPos.x * this.tileWidth;
+        var screenY = this.tiles.transform.position.y + mapPos.y * this.tileHeight;
 
         //var pos = Camera.main.ScreenToWorldPoint(new Vector2(screenX, screenY));
 
