@@ -12,87 +12,101 @@ public class TestHelloWorld : MonoBehaviour
     private GameObject tilePrefab;
     private GameObject tileGo;
 
+    //타일의 크기
     private float tileWidth = 0.64f;
-    private float tileHeight = 0.64f;
-    private int countX;
-    private int countY;
+    private float tileHeight = -0.32f;
+
+    //타일의 개수를 정해줌
+    //x로 몇개, Y로 몇개
+    public int col;
+    public int row;
+
+    //타일이 찍힐 좌표
+    private int isoPosX;
+    private int isoPosY;
+
     private void Awake()
     {
-        this.tilePrefab = Resources.Load<GameObject>("hollymolly");
+        this.tilePrefab = Resources.Load<GameObject>("IsoTile");
     }
 
     void Start()
     {
-        StringBuilder sb = new StringBuilder();
         StringBuilder txtPos = new StringBuilder();
-        int col = 4;
-        int row = 3;
-
-        for (int i = 0; i < row; i++)
-        {
-            for (int j = 0; j < col; j++)
-            {
-                sb.AppendFormat("({0},{1})", j, i);
-                sb.Append(" ");
-            }
-            sb.Append("\n");
-        }
-        Debug.Log(sb.ToString());
 
         //버튼눌러 타일 생성, 및 위치
         this.btn.onClick.AddListener(() =>
         {
-            //버튼눌러 만듬
-            Debug.Log("아뽜튼누름");
-            this.tileGo = GameObject.Instantiate(tilePrefab);
-            this.tileGo.transform.SetParent(this.tiles.transform);
-            this.tileGo.transform.position = MapToScreen(new Vector2(countX, -countY));
-
-            //텍스트
-            txtPos.AppendFormat("({0}, {1})", countX, countY);
-            this.tileGo.GetComponent<Tile>().txt.text = txtPos.ToString();
-            txtPos.Clear();
-
-            //카운팅 쇽쇽
-            this.countX++;
-
-            if (countX == col)
+            while (true)
             {
-                this.countY++;
-                this.countX = 0;
-            }
+                //버튼눌러 만듬
+                //Debug.Log("아뽜튼누름");
+                this.tileGo = GameObject.Instantiate(tilePrefab);
+                this.tileGo.transform.SetParent(this.tiles.transform);
+                this.tileGo.transform.position = this.IsoMapToScreen(this.isoPosX, this.isoPosY);
+                this.tileGo.GetComponent<Tile>().Pos = new Vector2(this.isoPosX, this.isoPosY);
+                //텍스트
+                this.tileGo.GetComponent<Tile>().txt.text = string.Format("({0}, {1})", this.isoPosX, this.isoPosY);
+                
+                //카운팅 쇽쇽
+                this.isoPosX++;
 
-            if(countY==row)
-            {
-                btn.gameObject.SetActive(false);
+                if (this.isoPosX == col)
+                {
+                    this.isoPosY++;
+                    this.isoPosX = 0;
+                }
+                if (isoPosY == row)
+                {
+                    this.btn.gameObject.SetActive(false);
+                    this.StartSearchTile();
+                break;
             }
-
+        }
         });
-
-
-        //타일의 위치를 128, -64
-        //스크린 포인트를 월드포인트로 바꿔서 놓아야해용
-        //this.tile.transform.position = Camera.main.ScreenToViewportPoint(new Vector3(64, -64, 0));
-        //this.tilePrefab.transform.position = new Vector3(0.64f, -0.64f, 0);
     }
 
-    public Vector2 MapToScreen(Vector2 mapPos)
+    private Vector2 IsoMapToScreen(float x, float y)
     {
-        //var screenX = mapPos.x * this.tileWidth + (8 * -1 * 0.64f);
-        //var screenY = mapPos.y * this.tileHeight + (6 * 1 * 0.64f);
-        var screenX = this.tiles.transform.position.x + mapPos.x * this.tileWidth;
-        var screenY = this.tiles.transform.position.y + mapPos.y * this.tileHeight;
+        var screenX = this.tiles.transform.position.x + (x - y) * this.tileWidth;
+        var screenY = this.tiles.transform.position.y + (x + y) * this.tileHeight;
 
-        //var pos = Camera.main.ScreenToWorldPoint(new Vector2(screenX, screenY));
-
+        //Debug.LogFormat("{0},{1}",screenX, screenY);
         return new Vector2(screenX, screenY);
-        //return pos;
     }
 
-    public Vector2 ScreenToMap(Vector2 screenPos)
+    private Vector2 IsoScreenToMap(float x, float y)
     {
-        var mapX = (int)screenPos.x / this.tileWidth;
-        var mapY = (int)screenPos.y / this.tileHeight;
+        //var mapX = this.tiles.transform.position.x - (x + y) / this.tileWidth;
+        //var mapY = this.tiles.transform.position.y - (x - y) / this.tileHeight;
+
+        float mapX = (x - y) / this.tileWidth;
+        float mapY = (x + y) / this.tileHeight;
+        
+
+        Debug.LogFormat("{0},{1}", mapX, mapY);
         return new Vector2(mapX, mapY);
+    }
+
+    private void StartSearchTile()
+    {
+        StartCoroutine(this.StartSearchTileImpl());
+    }
+
+    private IEnumerator StartSearchTileImpl()
+    {
+        while (true)
+        {
+            if (Input.GetMouseButtonUp(0))
+            {
+                Vector2 worldPoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                RaycastHit2D hit = Physics2D.Raycast(worldPoint, Vector2.zero);
+                if (hit.collider != null)
+                {
+                    Debug.LogFormat("({0}, {1})", hit.collider.GetComponent<Tile>().Pos.x, hit.collider.GetComponent<Tile>().Pos.y);
+                }
+            }
+            yield return null;
+        }
     }
 }

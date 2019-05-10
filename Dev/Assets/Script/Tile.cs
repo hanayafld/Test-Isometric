@@ -4,5 +4,6 @@ using UnityEngine;
 
 public class Tile : MonoBehaviour
 {
-    public TextMesh txt; 
+    public TextMesh txt;
+    public Vector2 Pos;
 }
