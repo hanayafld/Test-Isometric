@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class TestUIToggle : MonoBehaviour
 {
     public Image uiSlot1;
-    
+
     //스위치
     private bool uiSlotPop;
 
@@ -18,8 +18,6 @@ public class TestUIToggle : MonoBehaviour
             this.ShootRay();
         });
     }
-
-
 
     private void ShootRay()
     {
@@ -56,11 +54,6 @@ public class TestUIToggle : MonoBehaviour
                 }
             }
         }
-
         yield return null;
-        }
-
     }
-
-
 }
