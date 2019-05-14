@@ -25,9 +25,15 @@ public class TestHelloWorld : MonoBehaviour
     private int isoPosX;
     private int isoPosY;
 
+    public GameObject obj1x1;
+    public GameObject obj2x2;
+
     private void Awake()
     {
         this.tilePrefab = Resources.Load<GameObject>("IsoTile");
+
+        //마우스 올렸을때 초기화 할꺼 모음
+        StartCoroutine(this.MouseButtonUp());
     }
 
     void Start()
@@ -47,7 +53,7 @@ public class TestHelloWorld : MonoBehaviour
                 this.tileGo.GetComponent<Tile>().Pos = new Vector2(this.isoPosX, this.isoPosY);
                 //텍스트
                 this.tileGo.GetComponent<Tile>().txt.text = string.Format("({0}, {1})", this.isoPosX, this.isoPosY);
-                
+
                 //카운팅 쇽쇽
                 this.isoPosX++;
 
@@ -60,10 +66,11 @@ public class TestHelloWorld : MonoBehaviour
                 {
                     this.btn.gameObject.SetActive(false);
                     this.StartSearchTile();
-                break;
+                    break;
+                }
             }
-        }
         });
+
     }
 
     private Vector2 IsoMapToScreen(float x, float y)
@@ -82,7 +89,7 @@ public class TestHelloWorld : MonoBehaviour
 
         float mapX = (x - y) / this.tileWidth;
         float mapY = (x + y) / this.tileHeight;
-        
+
 
         Debug.LogFormat("{0},{1}", mapX, mapY);
         return new Vector2(mapX, mapY);
@@ -101,10 +108,33 @@ public class TestHelloWorld : MonoBehaviour
             {
                 Vector2 worldPoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                 RaycastHit2D hit = Physics2D.Raycast(worldPoint, Vector2.zero);
-                if (hit.collider != null)
+                if (hit.collider != null && hit.collider.tag == "Tile")
                 {
                     Debug.LogFormat("({0}, {1})", hit.collider.GetComponent<Tile>().Pos.x, hit.collider.GetComponent<Tile>().Pos.y);
                 }
+            }
+
+            if (Input.GetMouseButtonDown(0))
+            {
+                Vector2 worldPoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                RaycastHit2D hit = Physics2D.Raycast(worldPoint, Vector2.zero);
+
+                if (hit.collider != null && hit.collider.tag == "Obj")
+                {
+                    this.obj2x2.GetComponent<TestObj2x2>().dragOn = true;
+                }
+            }
+            yield return null;
+        }
+    }
+
+    private IEnumerator MouseButtonUp()
+    {
+        while (true)
+        {
+            if (Input.GetMouseButtonUp(0))
+            {
+                this.obj2x2.GetComponent<TestObj2x2>().dragOn = false;
             }
             yield return null;
         }
